@@ -14,15 +14,15 @@ import java.util.List;
 
 public class Main {//loosely coupling classlar birbirinden asili deyil icine kecmewk demekdi     thightly coupling asilidi
     public static void main(String[] args) throws Exception { 
-        UserDaoInter userDao=new UserDaoImpl();
-        List<User> list=userDao.getAll();
-        System.out.println("list="+list);
-        userDao.removeUser(1);
-        List<User> list2=userDao.getAll();
-        System.out.println("list="+list2);
-        User u=userDao.getById(5);
-//        userDao.addUser(u);
-        userDao.updateUser(u);
+//        UserDaoInter userDao=new UserDaoImpl();
+//        List<User> list=userDao.getAll();
+//        System.out.println("list="+list);
+//        userDao.removeUser(1);
+//        List<User> list2=userDao.getAll();
+//        System.out.println("list="+list2);
+//        User u=userDao.getById(5);
+////        userDao.addUser(u);
+//        userDao.updateUser(u);
 //        User u=new User();
 //        u.setName("Heyder':delete from user;commit;select;");
 //        u.setId(2);

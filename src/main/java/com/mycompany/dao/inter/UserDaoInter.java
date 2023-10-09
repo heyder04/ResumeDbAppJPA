@@ -13,7 +13,7 @@ import java.util.List;
  * @author HP 
  */
 public interface UserDaoInter {
-    public List<User>  getAll();
+    public List<User>  getAll(String name,String surname,Integer nationalityId);
     public User getById(int id);
     public boolean updateUser(User u);
     public boolean removeUser(int id);
