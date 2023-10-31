@@ -54,10 +54,10 @@ public class UserDaoImpl extends AbstractDAO implements UserDaoInter{
                     +"from user u "
                     +"left join country n on u.nationality_id=n.id "
                     +"left join country c on u.birthplace_id=c.id where  1=1 ";
-            if (name!=null){
+            if (name!=null&&name.trim().isEmpty()){
                 sql+=" and u.name=? ";
             }
-            if (surname!=null){
+            if (surname!=null&&surname.trim().isEmpty()){
                 sql+=" and u.surname";
             }
             if (nationalityId!=null){
@@ -65,11 +65,11 @@ public class UserDaoImpl extends AbstractDAO implements UserDaoInter{
             }
             PreparedStatement stmt=c.prepareStatement(sql);
             int i=1;
-            if(name!=null){
+            if(name!=null&&!name.trim().isEmpty()){
                 stmt.setString(i,name);
                 i++;
             }
-            if (surname!=null){
+            if (surname!=null&&!surname.trim().isEmpty()){
                 stmt.setString(i,surname);
                 i++;
             }
