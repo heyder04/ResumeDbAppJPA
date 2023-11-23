@@ -43,6 +43,19 @@ public class UserDaoImpl extends AbstractDAO implements UserDaoInter{
                 Country birthplace =new Country(birthplaceId,birthplaceStr,null);
                 return new User(id,name,surname,email,profileDesc,phone,birthdate,nationality,birthplace);
     }
+    private User getUserSimple(ResultSet rs)throws Exception{
+        int id=rs.getInt("id");
+        String name=rs.getString("name");
+        String surname=rs.getString("surname");
+        String email=rs.getString("email");
+        String profileDesc=rs.getString("profile_description");
+        String phone=rs.getString("phone");
+        int nationalityId=rs.getInt("nationality_id");
+        int birthplaceId=rs.getInt("birthplace_id");
+        Date birthdate=rs.getDate("birthdate");
+
+        return new User(id,name,surname,email,profileDesc,phone,birthdate,null,null);
+    }
     @Override
     public List<User> getAll(String name,String surname,Integer nationalityId) {
         List<User> result=new ArrayList<>();
@@ -90,16 +103,34 @@ public class UserDaoImpl extends AbstractDAO implements UserDaoInter{
          return result;
     }
 
-    
-    
+    @Override
+    public User findByEmailAndPassword(String email, String password) {
+          User result=null;
+        try( Connection c=connection()) {
+            PreparedStatement stmt=c.prepareStatement("select * from user where email=? and password=?");
+             stmt.setString(1,email);
+             stmt.setString(2,password);
+             ResultSet rs=stmt.executeQuery();
+             while (rs.next()){
+                  result=getUserSimple(rs);
+             }
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return result;
+
+    }
+
+
     @Override
     public boolean updateUser(User u) {
         try(  Connection c=connection()) {
               PreparedStatement stmt=c.prepareStatement("update user set name=?,surname=?,phone=?,email=?,profile_description=?,birthdate=?,birthplace_id=? where id=?");
               stmt.setString(1, u.getName());
               stmt.setString(2, u.getSurname());
-              stmt.setString(3, u.getEmail());
-              stmt.setString(4, u.getPhone());
+              stmt.setString(3, u.getPhone());
+              stmt.setString(4, u.getEmail());
                stmt.setString(5, u.getProfileDesc());
                stmt.setDate(6, u.getBirthDate());
                stmt.setInt(7, u.getBirthPlace().getId());
