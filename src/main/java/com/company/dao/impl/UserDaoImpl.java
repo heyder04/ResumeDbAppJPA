@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
 
 /**
  *
@@ -27,180 +31,115 @@ import java.util.logging.Logger;
  */
 public class UserDaoImpl extends AbstractDAO implements UserDaoInter{
 //Data Access Object
-    private User getUser(ResultSet rs)throws Exception{
-        int id=rs.getInt("id");
-                String name=rs.getString("name");
-                String surname=rs.getString("surname");
-                String email=rs.getString("email");
-                String profileDesc=rs.getString("profile_description");
-                String phone=rs.getString("phone");
-                int nationalityId=rs.getInt("nationality_id");
-                int birthplaceId=rs.getInt("birthplace_id");
-                String nationalityStr=rs.getString("nationality");
-                String birthplaceStr=rs.getString("birthplace");
-                Date birthdate=rs.getDate("birthdate");
-                Country nationality=new Country(nationalityId,null,nationalityStr);
-                Country birthplace =new Country(birthplaceId,birthplaceStr,null);
-                return new User(id,name,surname,email,profileDesc,phone,birthdate,nationality,birthplace);
-    }
-    private User getUserSimple(ResultSet rs)throws Exception{
-        int id=rs.getInt("id");
-        String name=rs.getString("name");
-        String surname=rs.getString("surname");
-        String email=rs.getString("email");
-        String profileDesc=rs.getString("profile_description");
-        String phone=rs.getString("phone");
-        int nationalityId=rs.getInt("nationality_id");
-        int birthplaceId=rs.getInt("birthplace_id");
-        Date birthdate=rs.getDate("birthdate");
 
-        return new User(id,name,surname,email,profileDesc,phone,birthdate,null,null);
-    }
+
     @Override
     public List<User> getAll(String name,String surname,Integer nationalityId) {
-        List<User> result=new ArrayList<>();
-        try(Connection c=connection()) {
-            String sql="select "
-                    +"u.*, "
-                    +"n.nationality as nationality, "
-                    +"c.name as birthplace "
-                    +"from user u "
-                    +"left join country n on u.nationality_id=n.id "
-                    +"left join country c on u.birthplace_id=c.id where  1=1 ";
-            if (name!=null&&name.trim().isEmpty()){
-                sql+=" and u.name=? ";
+        EntityManager em=em();
+        String jpql="select u from User u where 1=1" ;
+        
+//            String sql="select "
+//                    +"u.*, "
+//                    +"n.nationality as nationality, "
+//                    +"c.name as birthplace "
+//                    +"from user u "
+//                    +"left join country n on u.nationality_id=n.id "
+//                    +"left join country c on u.birthplace_id=c.id where  1=1 ";
+            if (name!=null&& !name.trim().isEmpty()){
+                jpql+=" and u.name=:name ";
             }
-            if (surname!=null&&surname.trim().isEmpty()){
-                sql+=" and u.surname";
+            if (surname!=null&& !surname.trim().isEmpty()){
+                jpql+=" and u.surname=:surname ";
             }
             if (nationalityId!=null){
-                sql+=" and u.nationality_id=?";
+                jpql+=" and u.nationality.id=:nId";
             }
-            PreparedStatement stmt=c.prepareStatement(sql);
-            int i=1;
+            Query q=em.createQuery(jpql,User.class);
+
             if(name!=null&&!name.trim().isEmpty()){
-                stmt.setString(i,name);
-                i++;
+                q.setParameter("name", name);
+             
             }
             if (surname!=null&&!surname.trim().isEmpty()){
-                stmt.setString(i,surname);
-                i++;
+               q.setParameter("surname", surname);
             }
             if (nationalityId!=null){
-                stmt.setInt(i,nationalityId);
+               q.setParameter("nId", nationalityId);
            
             }
-            stmt.execute();
-            ResultSet rs=stmt.getResultSet();
-            while(rs.next()){
-                User u=getUser(rs);
-                result.add(u);
-
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-         return result;
+           return q.getResultList();
     }
 
     @Override
     public User findByEmailAndPassword(String email, String password) {
-          User result=null;
-        try( Connection c=connection()) {
-            PreparedStatement stmt=c.prepareStatement("select * from user where email=? and password=?");
-             stmt.setString(1,email);
-             stmt.setString(2,password);
-             ResultSet rs=stmt.executeQuery();
-             while (rs.next()){
-                  result=getUserSimple(rs);
-             }
+        EntityManager entityManager=em();
+        Query q=entityManager.createQuery("select u from User u where u.email=:e and u.password= :p",User.class);
+        q.setParameter("e",email);
+        q.setParameter("p",password);
+        List<User> list= q.getResultList();
+        if(list.size()==1){
+            return list.get(0);
         }
-        catch (Exception e){
-            e.printStackTrace();
+        return null;
+    }
+      @Override
+    public User findByEmail(String email) {
+        EntityManager entityManager=em();
+        Query q=entityManager.createQuery("select u from User u where u.email=:e ",User.class);
+        q.setParameter("e",email);
+        
+        List<User> list= q.getResultList();
+        if(list.size()==1){
+            return list.get(0);
         }
-        return result;
+        return null;
+ 
 
     }
 
 
     @Override
     public boolean updateUser(User u) {
-        try(  Connection c=connection()) {
-              PreparedStatement stmt=c.prepareStatement("update user set name=?,surname=?,phone=?,email=?,profile_description=?,birthdate=?,birthplace_id=? where id=?");
-              stmt.setString(1, u.getName());
-              stmt.setString(2, u.getSurname());
-              stmt.setString(3, u.getPhone());
-              stmt.setString(4, u.getEmail());
-               stmt.setString(5, u.getProfileDesc());
-               stmt.setDate(6, u.getBirthDate());
-               stmt.setInt(7, u.getBirthPlace().getId());
-              stmt.setInt(8, u.getId());
-              
-              return stmt.execute( );
-//Statement stmt=c.createStatement();
-//            return stmt.execute("update user set name='azay' where id=1");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
+      EntityManager entityManager=em();
+     entityManager.getTransaction().begin();
+     entityManager.merge(u);
+     entityManager.getTransaction().commit();
+     entityManager.close();
+        
+
+     return true;
     }
     
      @Override
     public boolean addUser(User u) {
-        try(  Connection c=connection()) {
-              PreparedStatement stmt=c.prepareStatement("insert into user(name,surname,phone,email,profile_description) values(?,?,?,?,?) ");
-              stmt.setString(1, u.getName());
-              stmt.setString(2, u.getSurname());
-              stmt.setString(3, u.getEmail());
-              stmt.setString(4, u.getPhone());
-               stmt.setString(5, u.getProfileDesc());
-
-              return stmt.execute( );
-//Statement stmt=c.createStatement();
-//            return stmt.execute("update user set name='azay' where id=1");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
+          EntityManager entityManager=em();
+     entityManager.getTransaction().begin();
+     entityManager.persist(u);
+     entityManager.getTransaction().commit();
+     entityManager.close();
+         
+     return true;
     }
 
     @Override
     public boolean removeUser(int id) {
-        try(Connection c=connection()) {
-         
-            Statement stmt=c.createStatement();
-            return stmt.execute("delete from user where id="+id);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
+    EntityManager entityManager=em();
+     User u=entityManager.find(User.class,id );
+     entityManager.getTransaction().begin();
+     entityManager.remove(u);
+     entityManager.getTransaction().commit();
+    entityManager.close();
+     return true;
     }
 
     @Override
     public User getById(int userId) {
-               User result=null;
-        try(Connection c=connection()) {
-            
-            Statement stmt=c.createStatement();
-            stmt.execute("select "
-                    +"u.*, "
-                    +"n.nationality as nationality, "
-                    +"c.name as birthplace "
-                    +"from user u "
-                    +"left join country n on u.nationality_id=n.id "
-                    +"left join country c on u.birthplace_id=c.id where u.id="
-                    +userId);
-            ResultSet rs=stmt.getResultSet();
-            while(rs.next()){
-               
-                
-                result=getUser(rs);
-                 
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-         return result;
+     EntityManager entityManager=em();
+     User u=entityManager.find(User.class,userId );
+     entityManager.close();
+//        closeEnf();
+
+     return u;
     }
     
 

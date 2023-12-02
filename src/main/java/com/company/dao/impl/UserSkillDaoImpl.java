@@ -4,23 +4,15 @@
  */
 package com.company.dao.impl;
 
-import com.company.entity.Country;
-import com.company.entity.Skill;
-import com.company.entity.User;
 import com.company.entity.UserSkill;
 import com.mycompany.dao.inter.AbstractDAO;
-import com.mycompany.dao.inter.UserDaoInter;
 import com.mycompany.dao.inter.UserSkillDaoInter;
 import java.sql.Connection;
-import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -34,7 +26,8 @@ public class UserSkillDaoImpl extends AbstractDAO implements UserSkillDaoInter{
         int skillId=rs.getInt("skill_id");
         String skillName=rs.getString("skill_name");
         int power=rs.getInt("power");
-        return new UserSkill(userSkillId,new User(user_id),new Skill(skillId,skillName),power);
+//        return new UserSkill(userSkillId,new User(user_id),new Skill(skillId,skillName),power);
+return null;
     }
     
     

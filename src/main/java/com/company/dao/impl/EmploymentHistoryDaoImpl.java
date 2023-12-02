@@ -36,8 +36,8 @@ public class EmploymentHistoryDaoImpl extends AbstractDAO implements EmploymentH
       Date beginDate=rs.getDate("begin_Date");
       Date endDate=rs.getDate("end_Date");
       int userId=rs.getInt("user_id");
-      EmploymentHistory emp=new EmploymentHistory(null, header, beginDate, endDate, jobDescription, new User(userId));
-     return emp;
+//      EmploymentHistory emp=new EmploymentHistory(null, header, beginDate, endDate, jobDescription, new User(userId));
+     return null;
   }
     
     

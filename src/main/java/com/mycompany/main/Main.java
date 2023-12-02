@@ -35,10 +35,9 @@ public class Main {//loosely coupling classlar birbirinden asili deyil icine kec
 //         EmploymentHistoryDaoImpl empDao=new EmploymentHistoryDaoImpl();
 //        System.out.println( empDao.getAllEmploymentHistoryByUserId(5));
 //        
-        CountryDaoImpl dao=new CountryDaoImpl();
-        System.out.println(dao.getAll());
-        SkillDaoImpl dao2=new SkillDaoImpl();
-        System.out.println(dao2.getAll());
+   UserDaoImpl dao=new UserDaoImpl();
+   User u=dao.findByEmail("haydarmuxtar26@gmail.com");
+        System.out.println(u);
     }
     
     
