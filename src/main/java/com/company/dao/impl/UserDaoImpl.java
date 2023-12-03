@@ -24,6 +24,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  *
@@ -70,31 +73,76 @@ public class UserDaoImpl extends AbstractDAO implements UserDaoInter{
            return q.getResultList();
     }
 
-    @Override
+//    @Override
+//    public User findByEmailAndPassword(String email, String password) {
+//        EntityManager entityManager=em();
+//        Query q=entityManager.createQuery("select u from User u where u.email=:e and u.password= :p",User.class);
+//        q.setParameter("e",email);
+//        q.setParameter("p",password);
+//        List<User> list= q.getResultList();
+//        if(list.size()==1){
+//            return list.get(0);
+//        }
+//        return null;
+//    }
+    
+    
+        @Override
     public User findByEmailAndPassword(String email, String password) {
         EntityManager entityManager=em();
-        Query q=entityManager.createQuery("select u from User u where u.email=:e and u.password= :p",User.class);
-        q.setParameter("e",email);
-        q.setParameter("p",password);
-        List<User> list= q.getResultList();
-        if(list.size()==1){
-            return list.get(0);
-        }
-        return null;
+            CriteriaBuilder cb=entityManager.getCriteriaBuilder();
+            CriteriaQuery<User> q1=cb.createQuery(User.class);
+            Root<User> postRoot=q1.from(User.class);
+            CriteriaQuery<User> q2=q1.
+                    where(cb.equal(postRoot.get("email"), email),cb.equal(postRoot.get("password"), password));
+     Query q=entityManager.createQuery(q2);
+     List<User> list=q.getResultList();
+     if(list.size()==1){
+         return list.get(0);
+     }
+     return null;
     }
-      @Override
+//      @Override
+//    public User findByEmail(String email) {
+//        EntityManager entityManager=em();
+//        Query q=entityManager.createQuery("select u from User u where u.email=:e ",User.class);
+//        q.setParameter("e",email);
+//        
+//        List<User> list= q.getResultList();
+//        if(list.size()==1){
+//            return list.get(0);
+//        }
+//        return null;
+// 
+//
+//    }
+//          @Override
+//    public User findByEmail(String email) {
+//          EntityManager entityManager=em();
+//            CriteriaBuilder cb=entityManager.getCriteriaBuilder();
+//            CriteriaQuery<User> q1=cb.createQuery(User.class);
+//            Root<User> postRoot=q1.from(User.class);
+//            CriteriaQuery<User> q2=q1.
+//                    where(cb.equal(postRoot.get("email"), email));
+//     Query q=entityManager.createQuery(q2);
+//     List<User> list=q.getResultList();
+//     if(list.size()==1){
+//         return list.get(0);
+//     }
+//     return null;
+// 
+//    }
+              @Override
     public User findByEmail(String email) {
-        EntityManager entityManager=em();
-        Query q=entityManager.createQuery("select u from User u where u.email=:e ",User.class);
-        q.setParameter("e",email);
-        
-        List<User> list= q.getResultList();
-        if(list.size()==1){
-            return list.get(0);
-        }
-        return null;
+          EntityManager entityManager=em();
+        Query q= entityManager.createNamedQuery("User.findByEmail",User.class);
+         q.setParameter("email", email);
+     List<User> list=q.getResultList();
+     if(list.size()==1){
+         return list.get(0);
+     }
+     return null;
  
-
     }
 
 
