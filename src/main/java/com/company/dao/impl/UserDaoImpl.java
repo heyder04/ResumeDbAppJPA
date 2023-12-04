@@ -102,6 +102,7 @@ public class UserDaoImpl extends AbstractDAO implements UserDaoInter{
      }
      return null;
     }
+    //jpql
 //      @Override
 //    public User findByEmail(String email) {
 //        EntityManager entityManager=em();
@@ -116,6 +117,7 @@ public class UserDaoImpl extends AbstractDAO implements UserDaoInter{
 // 
 //
 //    }
+    //criteria builder
 //          @Override
 //    public User findByEmail(String email) {
 //          EntityManager entityManager=em();
@@ -132,11 +134,25 @@ public class UserDaoImpl extends AbstractDAO implements UserDaoInter{
 //     return null;
 // 
 //    }
-              @Override
+    //namedquery
+//              @Override
+//    public User findByEmail(String email) {
+//          EntityManager entityManager=em();
+//        Query q= entityManager.createNamedQuery("User.findByEmail",User.class);
+//         q.setParameter("email", email);
+//     List<User> list=q.getResultList();
+//     if(list.size()==1){
+//         return list.get(0);
+//     }
+//     return null;
+// 
+//    }
+    //sql
+       @Override
     public User findByEmail(String email) {
           EntityManager entityManager=em();
-        Query q= entityManager.createNamedQuery("User.findByEmail",User.class);
-         q.setParameter("email", email);
+        Query q= entityManager.createNativeQuery("select * from user where email = ?",User.class);
+         q.setParameter(1, email);
      List<User> list=q.getResultList();
      if(list.size()==1){
          return list.get(0);
